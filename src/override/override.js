@@ -10,8 +10,9 @@ let months = ['January', 'February', 'March', 'April',
               'September', 'October', 'November', 'December']
 
 let timeString = `${weekdays[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`
+let broadTime = now.getHours() < 12 ? 'morning' : now.getHours() > 17 ? 'evening' : 'afternoon'
 
-g.innerHTML = `Good ${now.getHours() < 12 ? 'morning' : 'afternoon'}. It is ${timeString}.`
+g.innerHTML = `Good ${broadTime}. It is ${timeString}.`
 
 n.innerHTML = localStorage.getItem(key)
 
