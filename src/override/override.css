@@ -1,5 +1,5 @@
 :root {
-  --light: #F6F7F9;
+  --light: #F7F7F7;
   --dark: #1A1A1A;
 
   --foreground: var(--dark);
@@ -21,6 +21,8 @@ html {
   line-height: 1.5;
   background-color: var(--background);
   color: var(--foreground);
+  transition: .1s ease;
+  transition-property: background-color, color;
 }
 
 .night {
