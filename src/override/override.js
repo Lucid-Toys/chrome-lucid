@@ -115,11 +115,43 @@ let n = document.querySelector('.notepad')
 n.innerHTML = data["notepadContent"]
 
 n.addEventListener('input', e => {
+  if(n !== document.activeElement || !windowIsActive) return
+
   let obj = Object.assign(data, {
     notepadContent: n.value
   })
 
   updateStore(key, obj)
+})
+
+// Allow updating content between tabs
+let windowIsActive
+
+let storeListener = setInterval(() => {
+  n.innerHTML = readStore(key).notepadContent
+}, 1000)
+
+window.onfocus = function () {
+  windowIsActive = true
+}
+
+window.onblur = function () {
+  windowIsActive = false
+  storeListener = setInterval(() => {
+    n.innerHTML = readStore(key).notepadContent
+  }, 1000)
+}
+
+n.addEventListener('blur', e => {
+  storeListener = setInterval(() => {
+    n.innerHTML = readStore(key).notepadContent
+  }, 1000)
+})
+
+n.addEventListener('focus', e => {
+  if(storeListener) {
+    clearInterval(storeListener)
+  }
 })
 
 // Initialise the view
