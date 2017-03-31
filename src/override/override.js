@@ -136,8 +136,8 @@ readStore(key, d => {
   start(data)
 })
 
-// Greet the human
 function start(data) {
+  // Greet the human
   let now = new Date()
   let timeString = `${weekdays[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`
   let broadTime = now.getHours() < 12 ?
@@ -153,11 +153,49 @@ function start(data) {
   n.innerHTML = data["notepadContent"]
 
   n.addEventListener('input', e => {
+    if(n !== document.activeElement || !windowIsActive) return
+
     let obj = Object.assign(data, {
       notepadContent: n.value
     })
 
     updateStore(key, obj)
+  })
+
+  // Allow updating content between tabs
+  let windowIsActive
+
+  let storeListener = setInterval(() => {
+    readStore(key, d => {
+      n.innerHTML = d.notepadContent
+    })
+  }, 1000)
+
+  window.onfocus = function () {
+    windowIsActive = true
+  }
+
+  window.onblur = function () {
+    windowIsActive = false
+    storeListener = setInterval(() => {
+      readStore(key, d => {
+        n.innerHTML = d.notepadContent
+      })
+    }, 1000)
+  }
+
+  n.addEventListener('blur', e => {
+    storeListener = setInterval(() => {
+      readStore(key, d => {
+        n.innerHTML = d.notepadContent
+      })
+    }, 1000)
+  })
+
+  n.addEventListener('focus', e => {
+    if(storeListener) {
+      clearInterval(storeListener)
+    }
   })
 
   // Initialise the view
