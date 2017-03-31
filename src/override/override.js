@@ -51,17 +51,28 @@ function toggleDaylight(isLight, update, storeKey) {
     d.classList.add('night')
   }
 
-  if(update) updateStore(storeKey, Object.assign({
-    "isNight": !isLight,
-  }, readStore(storeKey)))
+  if(update) {
+    readStore(storeKey, d => {
+      updateStore(storeKey, Object.assign({
+        "isNight": !isLight,
+      }, d))
+    })
+  }
 }
 
 function updateStore(storeKey, data) {
-  localStorage.setItem(storeKey, JSON.stringify(data))
+  let obj = {}
+      obj[storeKey] = JSON.stringify(data)
+  chrome.storage.sync.set(obj)
 }
 
-function readStore(storeKey) {
-  return JSON.parse(localStorage.getItem(storeKey))
+function readStore(storeKey,cb) {
+  chrome.storage.sync.get(storeKey, result => {
+    let d = null
+    if(result[storeKey])
+      d = JSON.parse(result[storeKey])
+    cb(d)
+  });
 }
 
 function init(data) {
@@ -87,58 +98,86 @@ let defaultData = {
     "lat": null,
     "lng": null,
   },
-}, data
-
-// >= v0.0.3 uses an object to store notepad content, so
-// provide a fallback for older versions
-try {
-  data = readStore(key)
-} catch(e) {
-  data = defaultData
-  data.notepadContent = localStorage.getItem(key)
-  updateStore(key, data)
 }
 
-// Greet the human
-let now = new Date()
-let timeString = `${weekdays[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`
-let broadTime = now.getHours() < 12 ?
-                'morning' :
-                now.getHours() > 17 ?
-                'evening' : 'afternoon'
+// >= v0.0.3 uses an object to store notepad content
+// >= v0.0.4 uses chrome sync to store notepad content
+// provide a fallback for older versions
+readStore(key, d => {
+  let data
 
-let g = document.querySelector('.greeting')
-g.innerHTML = `Good ${broadTime}. It is ${timeString}.`
+  if(d) {
+    data = d
+  }
+  else
+  {
+    local = localStorage.getItem(key)
 
-// Set up the notepad
-let n = document.querySelector('.notepad')
-n.innerHTML = data["notepadContent"]
-
-n.addEventListener('input', e => {
-  let obj = Object.assign(data, {
-    notepadContent: n.value
-  })
-
-  updateStore(key, obj)
-})
-
-// Initialise the view
-init(data)
-
-// Find the human's location and detect sunlight if necessary
-if("geolocation" in navigator) {
-  if(data.location && data.location.lat !== null && data.location.lng !== null) {
-    findDaylightAndAct(now, data.location.lat, data.location.lng, key)
-  } else {
-    navigator.geolocation.getCurrentPosition(position => {
-      data.location = {
-        "lat": position.coords.latitude,
-        "lng": position.coords.longitude,
+    if(local) {
+      try {
+        data = JSON.parse(local)
+        updateStore(key,local)
+      }
+      catch(e) {
+        data = defaultData
+        data.notepadContent = localStorage.getItem(key)
+        updateStore(key, data)
       }
 
-      updateStore(key, data)
+      // Delete the local storage
+      localStorage.removeItem(key)
+    }
 
-      findDaylightAndAct(now, data.location.lat, data.location.lng, key)
+    if( ! data ) {
+      data = defaultData
+    }
+  }
+
+  start(data)
+})
+
+// Greet the human
+function start(data) {
+  let now = new Date()
+  let timeString = `${weekdays[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`
+  let broadTime = now.getHours() < 12 ?
+                  'morning' :
+                  now.getHours() > 17 ?
+                  'evening' : 'afternoon'
+
+  let g = document.querySelector('.greeting')
+  g.innerHTML = `Good ${broadTime}. It is ${timeString}.`
+
+  // Set up the notepad
+  let n = document.querySelector('.notepad')
+  n.innerHTML = data["notepadContent"]
+
+  n.addEventListener('input', e => {
+    let obj = Object.assign(data, {
+      notepadContent: n.value
     })
+
+    updateStore(key, obj)
+  })
+
+  // Initialise the view
+  init(data)
+
+  // Find the human's location and detect sunlight if necessary
+  if("geolocation" in navigator) {
+    if(data.location && data.location.lat !== null && data.location.lng !== null) {
+      findDaylightAndAct(now, data.location.lat, data.location.lng, key)
+    } else {
+      navigator.geolocation.getCurrentPosition(position => {
+        data.location = {
+          "lat": position.coords.latitude,
+          "lng": position.coords.longitude,
+        }
+
+        updateStore(key, data)
+
+        findDaylightAndAct(now, data.location.lat, data.location.lng, key)
+      })
+    }
   }
 }
