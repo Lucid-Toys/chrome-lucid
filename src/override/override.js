@@ -14,8 +14,13 @@ let broadTime = now.getHours() < 12 ? 'morning' : now.getHours() > 17 ? 'evening
 
 g.innerHTML = `Good ${broadTime}. It is ${timeString}.`
 
-n.innerHTML = localStorage.getItem(key)
+chrome.storage.sync.get(key,function(result){
+  if(result[key])
+    n.innerHTML = result[key]
+})
 
 n.addEventListener('input', e => {
-  localStorage.setItem(key, n.value)
+  let obj = {}
+      obj[key] = n.value
+  chrome.storage.sync.set(obj)
 })

@@ -1,6 +1,6 @@
 {
   "name": "Lucid",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "manifest_version": 2,
   "description": "Replace your new tab page with a simple notepad.",
   "homepage_url": "https://github.com/daneden/chrome-lucid",
@@ -14,6 +14,7 @@
     "newtab": "src/override/override.html"
   },
   "permissions": [
-    "geolocation"
+    "geolocation",
+    "storage"
   ]
 }
