@@ -61,7 +61,13 @@ function updateStore(storeKey, data) {
 }
 
 function readStore(storeKey) {
-  return JSON.parse(localStorage.getItem(storeKey))
+  const d = localStorage.getItem(storeKey)
+
+  if(d === undefined || d === null) {
+    return Error()
+  } else {
+    return JSON.parse(localStorage.getItem(storeKey))
+  }
 }
 
 function init(data) {
@@ -87,7 +93,9 @@ let defaultData = {
     "lat": null,
     "lng": null,
   },
-}, data
+}
+
+let data = null
 
 // >= v0.0.3 uses an object to store notepad content, so
 // provide a fallback for older versions
