@@ -34,6 +34,7 @@ body {
   max-width: 40rem;
   margin: 0 auto;
   padding: 3rem;
+  padding-bottom: 0;
 }
 
 .greeting {
@@ -46,11 +47,12 @@ body {
   font-family: var(--fontStack) !important;
   display: block;
   width: 100%;
-  height: calc(100vh - 4.5rem);
+  height: calc(100vh - 6rem);
   appearance: none;
   font: inherit;
   border: none;
   outline: none;
   color: inherit;
   background: transparent;
+  resize: none;
 }
