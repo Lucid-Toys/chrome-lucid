@@ -69,9 +69,13 @@ function updateStore(storeKey, data) {
 function readStore(storeKey,cb) {
   chrome.storage.sync.get(storeKey, result => {
     let d = null
+
     if(result[storeKey])
       d = JSON.parse(result[storeKey])
-    cb(d)
+
+    // Make sure we got an object back, run callback
+    if( typeof(d) === 'object' )
+      cb(d)
   });
 }
 
@@ -101,23 +105,29 @@ let defaultData = {
 }
 
 // >= v0.0.3 uses an object to store notepad content
-// >= v0.0.4 uses chrome sync to store notepad content
+// >= v0.0.6 uses chrome sync to store notepad content
 // provide a fallback for older versions
 readStore(key, d => {
   let data
 
+  // Check if we got data from the chrome sync storage, if so, no fallback is needed
   if(d) {
     data = d
   }
   else
   {
+    // Get the local storage
     local = localStorage.getItem(key)
 
+    // Check if we got local storage data
     if(local) {
+      // Try parsing the local storage data as JSON.
+      // If it succeeds, we had an object in local storage
       try {
         data = JSON.parse(local)
         updateStore(key,local)
       }
+      // If it fails to parse, we had the notepad content in local storage
       catch(e) {
         data = defaultData
         data.notepadContent = localStorage.getItem(key)
@@ -128,6 +138,7 @@ readStore(key, d => {
       localStorage.removeItem(key)
     }
 
+    // If we couldn't get data from anywhere, set to default data
     if( ! data ) {
       data = defaultData
     }
@@ -135,6 +146,12 @@ readStore(key, d => {
 
   start(data)
 })
+
+function listenerUpdate() {
+  readStore(key, d => {
+    document.querySelector('.notepad').innerHTML = d.notepadContent
+  })
+}
 
 function start(data) {
   // Greet the human
@@ -165,11 +182,7 @@ function start(data) {
   // Allow updating content between tabs
   let windowIsActive
 
-  let storeListener = setInterval(() => {
-    readStore(key, d => {
-      n.innerHTML = d.notepadContent
-    })
-  }, 1000)
+  let storeListener = setInterval(listenerUpdate, 1000)
 
   window.onfocus = function () {
     windowIsActive = true
@@ -177,19 +190,17 @@ function start(data) {
 
   window.onblur = function () {
     windowIsActive = false
-    storeListener = setInterval(() => {
-      readStore(key, d => {
-        n.innerHTML = d.notepadContent
-      })
-    }, 1000)
+    if(storeListener) {
+      clearInterval(storeListener)
+    }
+    storeListener = setInterval(listenerUpdate, 1000)
   }
 
   n.addEventListener('blur', e => {
-    storeListener = setInterval(() => {
-      readStore(key, d => {
-        n.innerHTML = d.notepadContent
-      })
-    }, 1000)
+    if(storeListener) {
+      clearInterval(storeListener)
+    }
+    storeListener = setInterval(listenerUpdate, 1000)
   })
 
   n.addEventListener('focus', e => {
