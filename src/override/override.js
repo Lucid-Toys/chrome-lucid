@@ -105,7 +105,7 @@ let defaultData = {
 }
 
 // >= v0.0.3 uses an object to store notepad content
-// >= v0.0.6 uses chrome sync to store notepad content
+// >= v1.1.2 uses chrome sync to store notepad content
 // provide a fallback for older versions
 readStore(key, d => {
   let data
