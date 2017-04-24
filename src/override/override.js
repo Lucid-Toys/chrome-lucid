@@ -33,8 +33,8 @@ function findDaylightAndAct(now, lat, lng, storeKey) {
   .then(daylight => {
     const ONE_HOUR = 60 * 60 * 1000
     // Add an hour to our sunrise/set times because of ambient daylight
-    let sunrise = new Date(daylight.sunrise + ONE_HOUR)
-    let sunset = new Date(daylight.sunset + ONE_HOUR)
+    let sunrise = new Date(new Date(daylight.sunrise) + ONE_HOUR)
+    let sunset = new Date(new Date(daylight.sunset) + ONE_HOUR)
 
     if(now < sunrise || now > sunset) {
       toggleDaylight(false, true, storeKey)
