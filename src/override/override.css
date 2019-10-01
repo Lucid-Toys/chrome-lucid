@@ -1,58 +1,91 @@
 :root {
-  --light: #F7F7F7;
-  --dark: #1A1A1A;
+  --light: #f7f7f7;
+  --dark: #1a1a1a;
+  --med: #808080;
 
   --foreground: var(--dark);
   --background: var(--light);
 
-  --fontStack: "Input Mono", "SF Mono", Consolas, monospace;
+  --fontStack: "IBM Plex Mono", "Input Mono", "SF Mono", Consolas, monospace;
 }
 
 * {
+  box-sizing: border-box;
+  font: inherit;
   margin: 0;
   padding: 0;
   position: relative;
-  box-sizing: border-box;
-  font: inherit;
 }
 
 html {
-  font-size: 150%;
-  line-height: 1.75;
   background-color: var(--background);
   color: var(--foreground);
-  transition: .1s ease;
+  display: flex;
+  font-size: 150%;
+  height: 100%;
+  line-height: 1.75;
   transition-property: background-color, color;
+  transition: 0.1s ease;
+  overflow: hidden;
 }
 
-.night {
-  --foreground: var(--light);
-  --background: var(--dark);
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground: var(--light);
+    --background: var(--dark);
+  }
 }
 
 body {
-  max-width: 40rem;
-  margin: 0 auto;
+  --column-width: 80ch;
+  display: flex;
+  flex-direction: column;
+  flex: 0 1 var(--column-width);
+  height: 100%;
+  margin: auto;
   padding: 3rem;
   padding-bottom: 0;
 }
 
+body::after {
+  background-image: linear-gradient(transparent, var(--background));
+  bottom: 1.5rem;
+  content: "";
+  height: 1.5rem;
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}
+
 .greeting {
+  color: var(--med);
   font-family: var(--fontStack);
-  margin-bottom: 1.5rem;
-  opacity: .7;
+  margin-bottom: 0.75rem;
+  z-index: 1;
+}
+
+.greeting::after {
+  background-image: linear-gradient(var(--background), transparent);
+  content: "";
+  height: 1.5rem;
+  left: 0;
+  margin-top: 0.75rem;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
 }
 
 .notepad {
-  font-family: var(--fontStack) !important;
-  display: block;
-  width: 100%;
-  height: calc(100vh - 6rem);
   appearance: none;
-  font: inherit;
-  border: none;
-  outline: none;
-  color: inherit;
   background: transparent;
+  border: none;
+  color: inherit;
+  flex: 1 1 100%;
+  font-family: var(--fontStack) !important;
+  margin-bottom: 1.5rem;
+  outline: none;
+  padding-top: 1.5rem;
   resize: none;
 }
