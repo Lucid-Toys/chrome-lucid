@@ -4,11 +4,17 @@
 // To focus, clarity, rest, and joy
 // Which, I hope, you find in this toy
 
+let progressIndicator;
+
 // Define global funcs
 function updateStore(storeKey, data) {
+  data && progressIndicator.classList.remove('hidden')
   let obj = {}
   obj[storeKey] = JSON.stringify(data)
   chrome.storage.sync.set(obj)
+  setTimeout(() => {
+    progressIndicator.classList.add('hidden');
+  }, 1000);
 }
 
 function readStore(storeKey, cb) {
@@ -99,7 +105,7 @@ readStore(key, d => {
 
 function listenerUpdate() {
   readStore(key, d => {
-    document.querySelector(".notepad").innerHTML = d.notepadContent
+    d && (document.querySelector(".notepad").innerHTML = d.notepadContent)
   })
 }
 
@@ -117,12 +123,13 @@ function start(data) {
       : "afternoon"
 
   let g = document.querySelector(".greeting")
-  g.innerHTML = `Good ${broadTime}. It is ${timeString}.`
+  g.innerHTML = `<span>Good ${broadTime}. It is ${timeString}.</span> <span class="indicator hidden">Updating...</span>`
 
   // Set up the notepad
   let notepad = document.querySelector(".notepad")
-  notepad.innerHTML = data["notepadContent"]
+  notepad.innerHTML = data.notepadContent
 
+  progressIndicator = document.querySelector('.indicator');
   notepad.addEventListener("input", e => {
     if (notepad !== document.activeElement || !windowIsActive) return
 

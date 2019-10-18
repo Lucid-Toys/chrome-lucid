@@ -89,3 +89,23 @@ body::after {
   padding-top: 1.5rem;
   resize: none;
 }
+
+.indicator {
+  font-size: small;
+  color: var(--light);
+  background: var(--med);
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 20px;
+  padding: 4px 10px;
+  letter-spacing: 1px;
+  vertical-align: text-top;
+  visibility: visible;
+  opacity: 1;
+  transition: opacity .3s ease-in;
+}
+
+.indicator.hidden {
+  visibility: hidden;
+  opacity: 0;
+}
