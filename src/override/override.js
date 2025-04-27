@@ -12,7 +12,7 @@ function updateStore(storeKey, data) {
 }
 
 function readStore(storeKey, cb) {
-  chrome.storage.sync.get(storeKey, result => {
+  chrome.storage.sync.get(storeKey, (result) => {
     let d = null
 
     if (result[storeKey]) d = JSON.parse(result[storeKey])
@@ -60,7 +60,7 @@ let defaultData = {
 // >= v0.0.3 uses an object to store notepad content
 // >= v1.1.2 uses chrome sync to store notepad content
 // provide a fallback for older versions
-readStore(key, d => {
+readStore(key, (d) => {
   let data
 
   // Check if we got data from the chrome sync storage, if so, no fallback is needed
@@ -98,7 +98,7 @@ readStore(key, d => {
 })
 
 function listenerUpdate() {
-  readStore(key, d => {
+  readStore(key, (d) => {
     document.querySelector(".notepad").innerHTML = d.notepadContent
   })
 }
@@ -106,9 +106,14 @@ function listenerUpdate() {
 function start(data) {
   // Greet the human
   let now = new Date()
-  let timeString = `${weekdays[now.getDay()]}, ${
-    months[now.getMonth()]
-  } ${now.getDate()}`
+  let timeString = now.toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  })
+  // let timeString = `${weekdays[now.getDay()]}, ${
+  //   months[now.getMonth()]
+  // } ${now.getDate()}`
   let broadTime =
     now.getHours() < 12
       ? "morning"
@@ -123,7 +128,7 @@ function start(data) {
   let notepad = document.querySelector(".notepad")
   notepad.innerHTML = data["notepadContent"]
 
-  notepad.addEventListener("input", e => {
+  notepad.addEventListener("input", (e) => {
     if (notepad !== document.activeElement || !windowIsActive) return
 
     let obj = Object.assign(data, {
@@ -138,11 +143,11 @@ function start(data) {
 
   let storeListener = setInterval(listenerUpdate, 1000)
 
-  window.onfocus = function() {
+  window.onfocus = function () {
     windowIsActive = true
   }
 
-  window.onblur = function() {
+  window.onblur = function () {
     windowIsActive = false
     if (storeListener) {
       clearInterval(storeListener)
@@ -150,14 +155,14 @@ function start(data) {
     storeListener = setInterval(listenerUpdate, 1000)
   }
 
-  notepad.addEventListener("blur", e => {
+  notepad.addEventListener("blur", (e) => {
     if (storeListener) {
       clearInterval(storeListener)
     }
     storeListener = setInterval(listenerUpdate, 1000)
   })
 
-  notepad.addEventListener("focus", e => {
+  notepad.addEventListener("focus", (e) => {
     if (storeListener) {
       clearInterval(storeListener)
     }
